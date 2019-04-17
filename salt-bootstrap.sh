@@ -18,4 +18,4 @@ sudo launchctl unload /Library/LaunchDaemons/com.saltstack.salt.minion.plist
 
 sudo launchctl load /Library/LaunchDaemons/com.saltstack.salt.minion.plist
 
-echo "export PATH=$PATH:/opt/salt/bin" >> ~/jenkins/.bashrc
+echo "export PATH=$PATH:/opt/salt/bin" >> /Users/jenkins/.bashrc
