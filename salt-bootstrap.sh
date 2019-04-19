@@ -27,5 +27,5 @@ sudo launchctl load /Library/LaunchDaemons/com.saltstack.salt.minion.plist
 echo "Creating /Users/jenkins/.bashrc"
 echo "source /etc/profile" >> /Users/jenkins/.bashrc
 
-echo "Sourcing /Users/jenkins/.bashrc"
-source /Users/jenkins/.bashrc
+echo "Creating /Users/jenkins/.profile"
+echo "source /etc/profile" >> /Users/jenkins/.profile
