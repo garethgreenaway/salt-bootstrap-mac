@@ -28,4 +28,4 @@ echo "Creating /Users/jenkins/.bashrc"
 echo "source /etc/profile" >> /Users/jenkins/.bashrc
 
 echo "Link salt-call into path"
-ln -s /opt/salt/bin/salt-call /usr/local/bin/salt-call
+ln -s /opt/salt/bin/salt-call /usr/bin/salt-call
