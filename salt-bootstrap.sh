@@ -27,5 +27,5 @@ sudo launchctl load /Library/LaunchDaemons/com.saltstack.salt.minion.plist
 echo "Creating /Users/jenkins/.bashrc"
 echo "source /etc/profile" >> /Users/jenkins/.bashrc
 
-echo "Creating /Users/jenkins/.profile"
-echo "source /etc/profile" >> /Users/jenkins/.profile
+echo "Link salt-call into path"
+ln -s /opt/salt/bin/salt-call /usr/local/bin/salt-call
