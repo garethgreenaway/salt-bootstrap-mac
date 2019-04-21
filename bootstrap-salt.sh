@@ -6735,6 +6735,10 @@ install_macosx_git() {
 }
 
 install_macosx_stable_post() {
+    if [ ! -f /etc/paths.d/salt ]; then
+        echo "/opt/salt/bin\n/usr/local/sbin\n" > /etc/paths.d/salt
+    fi
+
    return 0
 }
 
