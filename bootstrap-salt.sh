@@ -6626,6 +6626,8 @@ install_macosx_stable_deps() {
 install_macosx_git_deps() {
     install_macosx_stable_deps || return 1
 
+    __git_clone_and_checkout || return 1
+
     return 0
 }
 
