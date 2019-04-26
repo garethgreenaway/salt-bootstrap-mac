@@ -6644,7 +6644,8 @@ install_macosx_git_deps() {
         __PIP_REQUIREMENTS="dev_python34.txt"
     fi
 
-    __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/${__PIP_REQUIREMENTS}" || return 1
+    requirements_file="${_SALT_GIT_CHECKOUT_DIR}/requirements/${__PIP_REQUIREMENTS}"
+    pip install -U -r ${requirements_file} --install-option="--prefix=/opt/salt" || return 1
 
     return 0
 }
