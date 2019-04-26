@@ -6626,64 +6626,6 @@ install_macosx_stable_deps() {
 install_macosx_git_deps() {
     install_macosx_stable_deps || return 1
 
-    # shellcheck disable=SC2086
-    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search ${FROM_FREEBSD} -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
-    # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y ${SALT_DEPENDENCIES} || return 1
-    # install python meta package
-    /usr/local/sbin/pkg install -y lang/python || return 1
-
-    if ! __check_command_exists git; then
-        /usr/local/sbin/pkg install -y git || return 1
-    fi
-
-    /usr/local/sbin/pkg install -y www/py-requests || return 1
-
-    __git_clone_and_checkout || return 1
-
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-             /usr/local/sbin/pkg install -y www/py-tornado4 || return 1
-        fi
-    fi
-
-    echodebug "Adapting paths to FreeBSD"
-    # The list of files was taken from Salt's BSD port Makefile
-    for file in doc/man/salt-key.1 doc/man/salt-cp.1 doc/man/salt-minion.1 \
-                doc/man/salt-syndic.1 doc/man/salt-master.1 doc/man/salt-run.1 \
-                doc/man/salt.7 doc/man/salt.1 doc/man/salt-call.1; do
-        [ ! -f $file ] && continue
-        echodebug "Patching ${file}"
-        sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
-                -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
-                -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" ${file}
-    done
-    if [ ! -f salt/syspaths.py ]; then
-        # We still can't provide the system paths, salt 0.16.x
-        # Let's patch salt's source and adapt paths to what's expected on FreeBSD
-        echodebug "Replacing occurrences of '/etc/salt' with ${_SALT_ETC_DIR}"
-        # The list of files was taken from Salt's BSD port Makefile
-        for file in conf/minion conf/master salt/config.py salt/client.py \
-                    salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
-                    salt/modules/postgres.py salt/utils/migrations.py; do
-            [ ! -f $file ] && continue
-            echodebug "Patching ${file}"
-            sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
-                    -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
-                    -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" ${file}
-        done
-    fi
-    echodebug "Finished patching"
-
-    # Let's trigger config_salt()
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-
-    fi
-
     return 0
 }
 
@@ -6699,7 +6641,6 @@ install_macosx_stable() {
 
 install_macosx_git() {
 
-    # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
     __PYTHON_PATH=$(readlink -f "$(command -v python2)")
     __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
 
@@ -6722,13 +6663,6 @@ install_macosx_git() {
             ${SETUP_PY_INSTALL_ARGS} install \
             || return 1
     fi
-
-    for script in salt_api salt_master salt_minion salt_proxy salt_syndic; do
-        __fetch_url "/usr/local/etc/rc.d/${script}" "https://raw.githubusercontent.com/freebsd/freebsd-ports/master/sysutils/py-salt/files/${script}.in" || return 1
-        sed -i '' 's/%%PREFIX%%/\/usr\/local/g' /usr/local/etc/rc.d/${script}
-        sed -i '' "s/%%PYTHON_CMD%%/${__ESCAPED_PYTHON_PATH}/g" /usr/local/etc/rc.d/${script}
-        chmod +x /usr/local/etc/rc.d/${script} || return 1
-    done
 
     # And we're good to go
     return 0
