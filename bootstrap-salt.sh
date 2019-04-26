@@ -6639,7 +6639,12 @@ install_macosx_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/dev.txt" || return 1
+    __PIP_REQUIREMENTS="dev_python27.txt"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PIP_REQUIREMENTS="dev_python34.txt"
+    fi
+
+    __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/${__PIP_REQUIREMENTS}" || return 1
 
     return 0
 }
