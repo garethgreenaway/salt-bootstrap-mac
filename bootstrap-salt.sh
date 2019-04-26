@@ -6626,7 +6626,20 @@ install_macosx_stable_deps() {
 install_macosx_git_deps() {
     install_macosx_stable_deps || return 1
 
+    __fetch_url "/tmp/get-pip.py" "https://bootstrap.pypa.io/get-pip.py" || return 1
+
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
+    else
+        _PYEXE=python2.7
+    fi
+
+    # Install PIP
+    $_PYEXE /tmp/get-pip.py || return 1
+
     __git_clone_and_checkout || return 1
+
+    __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/dev.txt" || return 1
 
     return 0
 }
@@ -6650,9 +6663,9 @@ install_macosx_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
     else
-        $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+        $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
     fi
 
     return 0
