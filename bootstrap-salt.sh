@@ -6643,30 +6643,18 @@ install_macosx_stable() {
 
 install_macosx_git() {
 
-    __PYTHON_PATH=$(readlink -f "$(command -v python2)")
-    __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
-
-    # Install from git
-    if [ ! -f salt/syspaths.py ]; then
-        # We still can't provide the system paths, salt 0.16.x
-        ${__PYTHON_PATH} setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
     else
-        ${__PYTHON_PATH} setup.py \
-            --salt-root-dir=/ \
-            --salt-config-dir="${_SALT_ETC_DIR}" \
-            --salt-cache-dir="${_SALT_CACHE_DIR}" \
-            --salt-sock-dir=/var/run/salt \
-            --salt-srv-root-dir="${_SALT_ETC_DIR}" \
-            --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
-            --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
-            --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
-            --salt-logs-dir=/var/log/salt \
-            --salt-pidfile-dir=/var/run \
-            ${SETUP_PY_INSTALL_ARGS} install \
-            || return 1
+        _PYEXE=python2.7
     fi
 
-    # And we're good to go
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+    else
+        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+    fi
+
     return 0
 }
 
